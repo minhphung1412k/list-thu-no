@@ -3,73 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Thu Nợ</title>
+    <title>Sổ Quản Lý Thu Tiền Nợ</title>
     <style>
         :root {
-            --primary-color: #4f46e5;
-            --success-color: #16a34a;
-            --danger-color: #dc2626;
-            --background-color: #f8fafc;
+            --primary-color: #3b82f6;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --background-color: #f1f5f9;
             --card-color: #ffffff;
-            --text-color: #1e293b;
+            --text-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
+            font-size: 16px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
         h1 {
             text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 30px;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* Thêm người mới */
+        /* Khung thêm người mới */
         .add-user-box {
             background: var(--card-color);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             display: flex;
             gap: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .add-user-box input {
             flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            padding: 12px 15px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
             font-size: 16px;
+            outline: none;
+        }
+        .add-user-box input:focus {
+            border-color: var(--primary-color);
         }
 
+        /* Nút bấm chung */
         .btn {
-            padding: 10px 20px;
+            padding: 12px 18px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: 600;
-            transition: opacity 0.2s;
+            font-weight: bold;
+            font-size: 15px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
+        .btn:active { transform: scale(0.97); }
         .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-success { background-color: var(--success-color); color: white; }
-        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-success { background-color: var(--success-color); color: white; width: 100%; }
+        .btn-danger { background-color: #ffeeef; color: var(--danger-color); }
+        .btn-edit { background-color: #eff6ff; color: var(--primary-color); }
 
-        /* Danh sách người thiếu */
+        /* Danh sách thẻ người nợ */
         .user-list {
             display: flex;
             flex-direction: column;
@@ -78,84 +92,125 @@
 
         .user-card {
             background: var(--card-color);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary-color);
         }
 
         .user-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #f1f5f9;
+            flex-direction: column;
+            gap: 10px;
+            border-bottom: 2px dashed #e2e8f0;
             padding-bottom: 15px;
             margin-bottom: 15px;
+        }
+        @media(min-width: 600px) {
+            .user-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
         }
 
         .user-info {
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .user-name {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 800;
+            color: #1e293b;
         }
 
         .total-money {
-            font-size: 18px;
+            font-size: 19px;
             color: var(--success-color);
-            font-weight: bold;
-        }
-
-        /* Lịch sử đóng tiền */
-        .history-zone {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .history-item {
-            background: #f1f5f9;
+            font-weight: 800;
+            background: #f0fdf4;
             padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .history-item .date { color: #64748b; font-weight: 500; }
-        .history-item .amount { color: var(--success-color); font-weight: bold; }
-
-        /* Khu vực nhập tiền */
-        .action-zone {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #f8fafc;
-            padding: 12px;
             border-radius: 8px;
-        }
-
-        .date-picker {
-            padding: 8px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-        }
-
-        .money-input-wrapper {
-            position: relative;
+            border: 1px solid #bbf7d0;
             display: inline-block;
         }
 
-        .money-input {
-            padding: 8px 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            width: 140px;
+        /* Lịch sử đóng tiền */
+        .history-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        .history-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            max-height: 180px;
+            overflow-y: auto;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .history-item .date { color: #475569; font-weight: 500; }
+        .history-item .amount { color: var(--success-color); font-weight: bold; font-size: 16px; }
+
+        /* Khu vực nhập tiền */
+        .action-zone {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        @media(min-width: 600px) {
+            .action-zone {
+                grid-template-columns: 1fr 1fr;
+            }
+            .btn-success { grid-column: span 2; }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .input-group label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .date-picker, .money-input {
+            padding: 12px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            width: 100%;
+        }
+        .date-picker:focus, .money-input:focus { border-color: var(--primary-color); }
+
+        .money-input-wrapper {
+            position: relative;
         }
 
         /* Menu gợi ý số tiền */
@@ -166,208 +221,359 @@
             left: 0;
             right: 0;
             background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             z-index: 10;
+            margin-top: 5px;
+            overflow: hidden;
         }
 
         .suggestion-item {
-            padding: 8px 12px;
+            padding: 12px 15px;
             cursor: pointer;
+            font-weight: bold;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:hover { background-color: #f1f5f9; color: var(--primary-color); }
+
+        /* Hộp thông báo Web tự chế (Toast) */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            left: 20px;
+            margin: auto;
+            max-width: 350px;
+            z-index: 9999;
+        }
+        @media(min-width: 600px) {
+            #toast-container { left: auto; }
+        }
+        .toast {
+            background: #1e293b;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .suggestion-item:hover {
-            background-color: #f1f5f9;
+        /* Hộp thoại xác nhận tùy biến thay cho prompt/confirm */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+        }
+        .modal-box h3 { margin-top: 0; color: #1e293b; }
+        .modal-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Quản Lý Thu Tiền Nợ</h1>
+<div id="toast-container"></div>
 
-    <!-- Form thêm người nợ mới -->
+<div id="custom-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 id="modal-title">Thông báo</h3>
+        <div id="modal-body"></div>
+        <div class="modal-buttons" id="modal-footer"></div>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Sổ Quản Lý Thu Tiền Nợ</h1>
+
     <div class="add-user-box">
         <input type="text" id="new-user-name" placeholder="Nhập tên người thiếu tiền...">
-        <button class="btn btn-primary" onclick="addUser()">Thêm Người Mới</button>
+        <button class="btn btn-primary" onclick="addUser()">Thêm</button>
     </div>
 
-    <!-- Danh sách hiển thị -->
     <div id="user-list" class="user-list"></div>
 </div>
 
 <script>
-    // Dữ liệu mẫu ban đầu nếu máy chưa có data
-    let debtors = JSON.parse(localStorage.getItem('debtors')) || [];
+    let debtors = JSON.parse(localStorage.getItem('debtors_v2')) || [];
 
-    // Hàm lưu dữ liệu vào trình duyệt
+    // Hàm hiện thông báo đẹp (Toast)
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        if(type === 'error') toast.style.backgroundColor = 'var(--danger-color)';
+        if(type === 'success') toast.style.backgroundColor = 'var(--success-color)';
+        toast.innerText = message;
+        container.appendChild(toast);
+        setTimeout(() => { toast.remove(); }, 2500);
+    }
+
+    // Hàm gọi Hộp thoại xác nhận/nhập liệu tùy biến (Thay thế hoàn toàn alert/confirm/prompt)
+    function showModal(title, bodyHTML, footerHTML) {
+        const modal = document.getElementById('custom-modal');
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-body').innerHTML = bodyHTML;
+        document.getElementById('modal-footer').innerHTML = footerHTML;
+        modal.style.display = 'flex';
+    }
+    function closeModal() {
+        document.getElementById('custom-modal').style.display = 'none';
+    }
+
+    // Lưu dữ liệu vào máy
     function saveData() {
-        localStorage.setItem('debtors', JSON.stringify(debtors));
+        localStorage.setItem('debtors_v2', JSON.stringify(debtors));
         renderList();
     }
 
-    // Định dạng ngày hiển thị (VD: Ngày 07/07)
-    function getTodayDateString() {
+    // Định dạng tiền tệ có dấu chấm và chữ đ (Ví dụ: 50.000đ)
+    function formatMoney(amount) {
+        return amount.toLocaleString('vi-VN') + 'đ';
+    }
+
+    // Hàm tự động thêm dấu chấm khi gõ tiền trong ô input
+    function formatInputMoney(input) {
+        let value = input.value.replace(/\./g, '');
+        if (!isNaN(value) && value !== '') {
+            input.setAttribute('data-raw', value);
+            input.value = parseInt(value).toLocaleString('vi-VN');
+        } else {
+            input.setAttribute('data-raw', '');
+        }
+    }
+
+    // Biến đổi ngày YYYY-MM-DD thành câu chữ thuần Việt (Ngày... tháng... năm...)
+    function formatVietnameseDate(dateStr) {
+        if (!dateStr) return "";
+        const parts = dateStr.split('-');
+        return `Ngày ${parts[2]} tháng ${parts[1]} năm ${parts[0]}`;
+    }
+
+    // Lấy ngày hôm nay định dạng chuẩn YYYY-MM-DD cho ô lịch
+    function getTodayInputFormat() {
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
-        return `${dd}/${mm}`;
+        const yyyy = today.getFullYear();
+        return `${yyyy}-${mm}-${dd}`;
     }
 
-    // Thêm người mới
+    // Thêm người nợ mới
     function addUser() {
         const nameInput = document.getElementById('new-user-name');
         const name = nameInput.value.trim();
-        if (!name) return alert('Vui lòng nhập tên!');
-        
+        if (!name) {
+            showToast('Vui lòng nhập tên người nợ!', 'error');
+            return;
+        }
         debtors.push({
             id: Date.now(),
             name: name,
-            history: [] // Chứa danh sách { date: '07/07', amount: 100 }
+            history: []
         });
-        
         nameInput.value = '';
+        showToast(`Đã thêm thành công người tên: ${name}`);
         saveData();
     }
 
-    // Xóa người nợ
-    function deleteUser(id) {
-        if(confirm('Bạn có chắc chắn muốn xóa người này không? Dữ liệu thu tiền cũng sẽ mất.')) {
-            debtors = debtors.filter(user => user.id !== id);
+    // Xóa người nợ bằng hộp thoại web đẹp
+    function deleteUser(id, name) {
+        showModal(
+            'Xác nhận xóa',
+            `<p>Bạn có chắc chắn muốn xóa tên <b>${name}</b> không? Toàn bộ lịch sử thu tiền của người này sẽ bị mất!</p>`,
+            `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
+             <button class="btn btn-danger" onclick="confirmDelete(${id})">Đồng ý xóa</button>`
+        );
+    }
+    function confirmDelete(id) {
+        debtors = debtors.filter(user => user.id !== id);
+        closeModal();
+        showToast('Đã xóa người nợ khỏi danh sách', 'error');
+        saveData();
+    }
+
+    // Sửa tên người nợ bằng hộp thoại web đẹp
+    function editUser(id, oldName) {
+        showModal(
+            'Đổi tên người nợ',
+            `<input type="text" id="edit-name-input" value="${oldName}" placeholder="Nhập tên mới...">`,
+            `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
+             <button class="btn btn-primary" onclick="confirmEdit(${id})">Lưu lại</button>`
+        );
+        setTimeout(() => document.getElementById('edit-name-input').focus(), 100);
+    }
+    function confirmEdit(id) {
+        const newName = document.getElementById('edit-name-input').value.trim();
+        if(newName) {
+            const user = debtors.find(u => u.id === id);
+            user.name = newName;
+            closeModal();
+            showToast('Đã cập nhật tên mới thành công');
             saveData();
+        } else {
+            showToast('Tên không được để trống!', 'error');
         }
     }
 
-    // Sửa tên người nợ
-    function editUser(id) {
-        const user = debtors.find(u => u.id === id);
-        const newName = prompt("Nhập tên mới cho " + user.name + ":", user.name);
-        if (newName && newName.trim() !== "") {
-            user.name = newName.trim();
-            saveData();
-        }
-    }
-
-    // Hiển thị/Ẩn menu gợi ý tiền khi click vào input
+    // Quản lý ẩn hiện menu gợi ý số tiền
     function toggleSuggestions(id, show) {
         const sugDiv = document.getElementById(`sug-${id}`);
         if(show) {
             sugDiv.style.display = 'block';
         } else {
-            // Delay một xíu để kịp nhận sự kiện click chọn số tiền trước khi ẩn
             setTimeout(() => { sugDiv.style.display = 'none'; }, 200);
         }
     }
 
-    // Chọn số tiền từ gợi ý
+    // Chọn số tiền từ danh sách gợi ý mẫu
     function selectSuggestion(id, value) {
         const input = document.getElementById(`input-${id}`);
-        input.value = value;
+        input.value = value.toLocaleString('vi-VN');
+        input.setAttribute('data-raw', value);
     }
 
-    // Xác nhận thu tiền của một người
+    // Xác nhận ghi nhận thu tiền
     function collectMoney(id) {
         const input = document.getElementById(`input-${id}`);
         const dateInput = document.getElementById(`date-${id}`);
         
-        let amount = parseInt(input.value);
-        let dateValue = dateInput.value; // Định dạng YYYY-MM-DD từ ô chọn ngày
+        let rawAmount = input.getAttribute('data-raw') || input.value.replace(/\./g, '');
+        let amount = parseInt(rawAmount);
+        let dateValue = dateInput.value;
 
-        if (!amount || amount <= 0) return alert('Vui lòng nhập hoặc chọn số tiền hợp lệ!');
-        
-        // Định dạng lại ngày từ input dạng lịch thành dd/mm để hiển thị gọn
-        let formattedDate = getTodayDateString();
-        if(dateValue) {
-            const parts = dateValue.split('-');
-            formattedDate = `${parts[2]}/${parts[1]}`;
+        if (!amount || amount <= 0) {
+            showToast('Vui lòng điền số tiền hợp lệ!', 'error');
+            return;
+        }
+        if (!dateValue) {
+            showToast('Vui lòng chọn ngày thu tiền!', 'error');
+            return;
         }
 
+        const formattedDate = formatVietnameseDate(dateValue);
         const user = debtors.find(u => u.id === id);
+        
         user.history.push({
             date: formattedDate,
             amount: amount
         });
 
-        input.value = ''; // Reset ô nhập tiền
+        input.value = '';
+        input.setAttribute('data-raw', '');
+        showToast(`Đã thu ${formatMoney(amount)} từ ${user.name}`);
         saveData();
     }
 
-    // Hàm render (vẽ) giao diện ra màn hình dựa trên dữ liệu
+    // Hàm dựng và hiển thị danh sách lên màn hình
     function renderList() {
         const listDiv = document.getElementById('user-list');
         listDiv.innerHTML = '';
 
         if(debtors.length === 0) {
-            listDiv.innerHTML = '<p style="text-align:center; color:#64748b;">Chưa có ai trong danh sách thiếu tiền.</p>';
+            listDiv.innerHTML = '<p style="text-align:center; color:#64748b; font-size:18px; margin-top:30px;">Sổ hiện tại đang trống.</p>';
             return;
         }
 
         debtors.forEach(user => {
-            // Tính tổng tiền đã thu của người này
             const total = user.history.reduce((sum, item) => sum + item.amount, 0);
 
-            // Tạo danh sách lịch sử đóng tiền dạng html
             let historyHTML = '';
             user.history.forEach(item => {
                 historyHTML += `
                     <div class="history-item">
-                        <span class="date">${item.date}:</span>
-                        <span class="amount">+${item.amount}k</span>
+                        <span class="date">${item.date}</span>
+                        <span class="amount">+${formatMoney(item.amount)}</span>
                     </div>
                 `;
             });
 
             if(user.history.length === 0) {
-                historyHTML = '<span style="font-size:14px; color:#94a3b8;">Chưa có lịch sử thu tiền</span>';
+                historyHTML = '<span style="font-size:16px; color:#94a3b8; text-align:center; padding:10px 0;">Chưa có lịch sử thu tiền</span>';
             }
 
-            // Tạo thẻ thông tin người nợ
             const card = document.createElement('div');
             card.className = 'user-card';
             card.innerHTML = `
                 <div class="user-header">
                     <div class="user-info">
                         <span class="user-name">${user.name}</span>
-                        <button class="btn btn-primary" style="padding:4px 8px; font-size:12px;" onclick="editUser(${user.id})">Sửa tên</button>
-                        <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteUser(${user.id})">Xóa</button>
+                        <button class="btn btn-edit" style="padding:6px 12px; font-size:14px;" onclick="editUser(${user.id}, '${user.name}')">Sửa tên</button>
+                        <button class="btn btn-danger" style="padding:6px 12px; font-size:14px;" onclick="deleteUser(${user.id}, '${user.name}')">Xóa</button>
                     </div>
-                    <div class="total-money">Đã thu: ${total}k</div>
+                    <div class="total-money">Tổng thu: ${formatMoney(total)}</div>
                 </div>
 
-                <!-- Lịch sử đóng tiền -->
+                <div class="history-title">Lịch sử các ngày đóng tiền:</div>
                 <div class="history-zone">
                     ${historyHTML}
                 </div>
 
-                <!-- Khu vực nhập thu tiền -->
                 <div class="action-zone">
-                    <label style="font-size:14px; font-weight:500;">Ngày thu:</label>
-                    <input type="date" id="date-${user.id}" class="date-picker">
+                    <div class="input-group">
+                        <label>Chọn Ngày Thu:</label>
+                        <input type="date" id="date-${user.id}" class="date-picker" value="${getTodayInputFormat()}">
+                    </div>
                     
-                    <label style="font-size:14px; font-weight:500;">Số tiền (k):</label>
-                    <div class="money-input-wrapper">
-                        <input type="number" id="input-${user.id}" class="money-input" placeholder="Tự ghi hoặc chọn..." 
-                               onfocus="toggleSuggestions(${user.id}, true)" 
-                               onblur="toggleSuggestions(${user.id}, false)">
-                        
-                        <!-- Menu gợi ý nhảy ra khi bấm vào ô tiền -->
-                        <div id="sug-${user.id}" class="suggestions">
-                            <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 50)">50k</div>
-                            <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 100)">100k</div>
-                            <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 200)">200k</div>
-                            <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 500)">500k</div>
+                    <div class="input-group">
+                        <label>Số Tiền Thu Được (đ):</label>
+                        <div class="money-input-wrapper">
+                            <input type="text" id="input-${user.id}" class="money-input" placeholder="Tự ghi số tiền..." 
+                                   oninput="formatInputMoney(this)"
+                                   onfocus="toggleSuggestions(${user.id}, true)" 
+                                   onblur="toggleSuggestions(${user.id}, false)">
+                            
+                            <div id="sug-${user.id}" class="suggestions">
+                                <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 50000)">50.000đ</div>
+                                <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 100000)">100.000đ</div>
+                                <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 200000)">200.000đ</div>
+                                <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 500000)">500.000đ</div>
+                            </div>
                         </div>
                     </div>
 
-                    <button class="btn btn-success" onclick="collectMoney(${user.id})">Xác nhận thu</button>
+                    <button class="btn btn-success" onclick="collectMoney(${user.id})">Xác Nhận Thu Tiền</button>
                 </div>
             `;
             listDiv.appendChild(card);
         });
     }
 
-    // Chạy render lần đầu tiên khi mở trang web lên
     renderList();
 </script>
 
