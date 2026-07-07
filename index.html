@@ -29,57 +29,6 @@
             min-height: 100vh;
         }
 
-        /* Giao diện màn hình đăng nhập khóa bảo mật */
-        .login-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .login-box {
-            background: white;
-            padding: 30px;
-            border-radius: 24px;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        .login-box h2 {
-            margin: 0 0 10px 0;
-            color: #0f172a;
-            font-size: 22px;
-            font-weight: 800;
-        }
-        .login-box p {
-            color: #64748b;
-            font-size: 14px;
-            margin: 0 0 20px 0;
-        }
-        .login-box input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #cbd5e1;
-            border-radius: 12px;
-            font-size: 16px;
-            text-align: center;
-            outline: none;
-            margin-bottom: 15px;
-            transition: border-color 0.2s;
-        }
-        .login-box input:focus {
-            border-color: #3b82f6;
-        }
-
-        /* Khung nội dung chính (Ẩn đi khi chưa đăng nhập) */
-        .app-content {
-            display: none;
-        }
-
         .container {
             max-width: 850px;
             margin: 0 auto;
@@ -390,15 +339,6 @@
 
 <div id="toast-container"></div>
 
-<div id="login-screen" class="login-overlay">
-    <div class="login-box">
-        <h2>HỆ THỐNG KHÓA BẢO MẬT</h2>
-        <p>Vui lòng nhập mật khẩu để xem hoặc sửa dữ liệu sổ nợ</p>
-        <input type="password" id="password-input" placeholder="Nhập mật khẩu nhập sổ nợ..." onkeydown="checkPasswordKey(event)">
-        <button class="btn btn-primary" style="width:100%;" onclick="verifyPassword()">Đăng Nhập Hệ Thống</button>
-    </div>
-</div>
-
 <div id="custom-modal" class="modal-overlay">
     <div class="modal-box">
         <h3 id="modal-title">Thông báo</h3>
@@ -407,56 +347,31 @@
     </div>
 </div>
 
-<div id="main-app" class="app-content">
-    <div class="container">
-        <div class="app-header">
-            <h1>Sổ Quản Lý Thu Tiền Nợ</h1>
-            <p>Giao diện nâng cấp thông minh - Bảo mật an toàn cao</p>
-        </div>
-
-        <div class="tool-box">
-            <div class="input-row">
-                <input type="text" id="new-user-name" placeholder="Nhập tên người thiếu tiền mới...">
-                <button class="btn btn-primary" onclick="addUser()">Thêm Người</button>
-            </div>
-            
-            <div class="input-row search-box">
-                <input type="text" id="search-user-name" placeholder="🔍 Gõ vào đây để TÌM TÊN người nợ..." oninput="searchUser()">
-            </div>
-        </div>
-
-        <div id="user-list" class="user-list"></div>
+<div class="container">
+    <div class="app-header">
+        <h1>Sổ Quản Lý Thu Tiền Nợ</h1>
+        <p>Giao diện nâng cấp thông minh - Tiện lợi cho Mẹ</p>
     </div>
+
+    <div class="tool-box">
+        <div class="input-row">
+            <input type="text" id="new-user-name" placeholder="Nhập tên người thiếu tiền mới...">
+            <button class="btn btn-primary" onclick="addUser()">Thêm Người</button>
+        </div>
+        
+        <div class="input-row search-box">
+            <input type="text" id="search-user-name" placeholder="🔍 Gõ vào đây để TÌM TÊN người nợ..." oninput="searchUser()">
+        </div>
+    </div>
+
+    <div id="user-list" class="user-list"></div>
 </div>
 
 <script>
-    // Dữ liệu trống ban đầu, chỉ được nạp từ LocalStorage khi ĐỒNG Ý mật khẩu chính xác
-    let debtors = [];
+    let debtors = JSON.parse(localStorage.getItem('debtors_final_store')) || [];
     let searchQuery = "";
 
-    // 🔒 KIỂM TRA MẬT KHẨU BẢO MẬT
-    function checkPasswordKey(event) {
-        if (event.key === "Enter") {
-            verifyPassword();
-        }
-    }
-
-    function verifyPassword() {
-        const passwordEntered = document.getElementById("password-input").value;
-        if (passwordEntered === "bminh1808") {
-            document.getElementById("login-screen").style.display = "none";
-            document.getElementById("main-app").style.display = "block";
-            
-            // Chỉ nạp dữ liệu từ bộ nhớ sau khi vượt qua mật khẩu thành công
-            debtors = JSON.parse(localStorage.getItem('debtors_final_store')) || [];
-            renderList();
-            showToast("Đăng nhập thành công! Đã mở khóa sổ nợ.");
-        } else {
-            showToast("Mật khẩu sai! Vui lòng không xâm nhập bất hợp pháp.", "error");
-        }
-    }
-
-    // Hàm thông minh giải quyết lỗi vị trí gõ phím (Nhảy con trỏ chuột về CUỐI DÒNG)
+    // Hàm thông minh giải quyết lỗi vị trí gõ phím (Nhảy con trỏ về CUỐI DÒNG)
     function focusAndMoveCursorToEnd(inputElement) {
         inputElement.focus();
         const length = inputElement.value.length;
@@ -563,7 +478,6 @@
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
              <button class="btn btn-primary" onclick="confirmEdit(${id})">Lưu lại</button>`
         );
-        // Khắc phục lỗi nhảy con trỏ lên đầu dòng chữ khi đổi tên người nợ
         setTimeout(() => {
             const el = document.getElementById('edit-name-input');
             focusAndMoveCursorToEnd(el);
@@ -608,7 +522,6 @@
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
              <button class="btn btn-primary" onclick="confirmEditHistoryItem(${userId}, ${itemTimestamp})">Cập nhật</button>`
         );
-        // Khắc phục lỗi nhảy con trỏ lên đầu dòng chữ khi sửa số tiền đóng
         setTimeout(() => {
             const input = document.getElementById('edit-money-input');
             focusAndMoveCursorToEnd(input);
@@ -646,6 +559,10 @@
         }
     }
 
+    const style = document.createElement('style');
+    style.innerHTML = '.money-input-wrapper { position: relative; }';
+    document.head.appendChild(style);
+
     function selectSuggestion(id, value) {
         const input = document.getElementById(`input-${id}`);
         input.value = value.toLocaleString('vi-VN');
@@ -656,7 +573,7 @@
         const input = document.getElementById(`input-${id}`);
         const dateInput = document.getElementById(`date-${id}`);
         
-        let rawAmount = input.getAttribute('data-raw()') || input.value.replace(/\./g, '');
+        let rawAmount = input.getAttribute('data-raw') || input.value.replace(/\./g, '');
         let amount = parseInt(rawAmount);
         let dateValue = dateInput.value;
 
@@ -771,6 +688,8 @@
             listDiv.appendChild(card);
         });
     }
+
+    renderList();
 </script>
 </body>
 </html>
