@@ -517,7 +517,7 @@
     function editHistoryItem(userId, itemTimestamp, oldAmount) {
         showModal(
             'Sửa lại số tiền',
-            `<p style="font-size:14px; color:#64748b; margin-bottom:5px;"> (đ):</p>
+            `<p style="font-size:14px; color:#64748b; margin-bottom:5px;"></p>
              <input type="text" id="edit-money-input" value="${oldAmount.toLocaleString('vi-VN')}" oninput="formatInputMoney(this)">`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
              <button class="btn btn-primary" onclick="confirmEditHistoryItem(${userId}, ${itemTimestamp})">Cập nhật</button>`
