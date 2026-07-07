@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sổ Ghi Chép Thu Tiền</title>
+    <title>Sổ ghi nợ đơn giản</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -273,7 +273,7 @@
 
 <div class="wrapper">
     <div class="header-box">
-        <h1>✨ Sổ Ghi Chép Của Mẹ</h1>
+        <h1>Sổ ghi nợ đơn giản</h1>
         <div class="network-status">
             <div id="indicator" class="status-indicator"></div>
             <span id="status-text">Đang tải dữ liệu...</span>
@@ -437,7 +437,7 @@
             history: []
         }).then(() => {
             nameInput.value = '';
-            showToast(`✨ Đã thêm thành công: ${name}`);
+            showToast(`Đã thêm thành công: ${name}`);
         });
     }
 
@@ -556,7 +556,7 @@
         const input = document.getElementById(`input-${id}`);
         const dateInput = document.getElementById(`date-${id}`);
         
-        let rawAmount = input.getAttribute('data-raw') || input.value.replace(/\./g, '');
+        let rawAmount = input.getAttribute('data-raw'] || input.value.replace(/\./g, '');
         let amount = parseInt(rawAmount);
         let dateValue = dateInput.value;
 
