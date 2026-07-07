@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sổ ghi nợ đơn</title>
+    <title>Sổ ghi nợ</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -26,7 +26,6 @@
             padding: 0;
         }
 
-        /* Nền Gradient chuyển màu nhẹ nhàng, sang trọng */
         body {
             background: linear-gradient(-45deg, #fbc2eb, #a6c1ee, #fbc2eb);
             background-size: 300% 300%;
@@ -47,7 +46,6 @@
             margin: 0 auto;
         }
 
-        /* Tiêu đề xịn sò */
         .header-box {
             text-align: center;
             margin-bottom: 25px;
@@ -69,7 +67,6 @@
             margin-bottom: 8px;
         }
 
-        /* Trạng thái mạng nhỏ gọn, tinh tế */
         .network-status {
             display: inline-flex;
             align-items: center;
@@ -89,7 +86,6 @@
         .status-online { background-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
         .status-error { background-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
 
-        /* Khung kính nhập liệu */
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -121,7 +117,6 @@
             transform: translateY(-1px);
         }
 
-        /* Nút bấm hiệu ứng mượt mà */
         .btn {
             padding: 14px 24px; border: none; border-radius: 16px;
             font-size: 15px; font-weight: 700; cursor: pointer;
@@ -137,7 +132,6 @@
         .btn-text-edit { background: rgba(224, 242, 254, 0.8); color: #0284c7; font-size: 13px; padding: 8px 14px; border-radius: 10px; }
         .btn-text-edit:hover { background: #0284c7; color: white; }
 
-        /* Thẻ thông tin người nợ đẹp như App Ngân Hàng */
         .person-card {
             background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border-radius: 28px; padding: 24px;
@@ -168,7 +162,6 @@
             display: flex; align-items: center; gap: 6px;
         }
 
-        /* Lịch sử nhật ký cuộn mượt */
         .logs-container {
             display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;
             max-height: 200px; overflow-y: auto; padding-right: 5px;
@@ -194,7 +187,6 @@
         .btn-mini-delete { background: rgba(254, 226, 226, 0.8); color: #b91c1c; }
         .btn-mini-delete:hover { background: #dc2626; color: white; }
 
-        /* Ô nhập số tiền gọn gàng */
         .grid-inputs {
             display: grid; grid-template-columns: 1fr; gap: 12px;
             background: rgba(248, 250, 252, 0.5); padding: 16px;
@@ -208,7 +200,6 @@
         .field-group { display: flex; flex-direction: column; gap: 6px; }
         .field-group label { font-size: 13px; font-weight: 700; color: var(--text-sub); padding-left: 4px; }
 
-        /* Gợi ý số tiền nổi bồng bềnh */
         .suggest-wrapper { position: relative; }
         .suggest-box {
             display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0;
@@ -223,7 +214,6 @@
         .suggest-item:last-child { border-bottom: none; }
         .suggest-item:hover { background: #f0f9ff; color: var(--primary); padding-left: 22px; }
 
-        /* Hiệu ứng Toast mềm mại */
         #toast-box {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             width: calc(100% - 40px); max-width: 380px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;
@@ -236,7 +226,6 @@
         }
         @keyframes popUp { from { transform: translateY(-20px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-        /* Cửa sổ Popup (Modal) bo góc siêu đẹp */
         .overlay {
             display: none; position: fixed; top:0; left:0; right:0; bottom:0;
             background: rgba(15, 23, 42, 0.5); z-index: 99999; align-items: center; justify-content: center;
@@ -276,17 +265,17 @@
         <h1>Sổ ghi nợ</h1>
         <div class="network-status">
             <div id="indicator" class="status-indicator"></div>
-            <span id="status-text">Đang tải dữ liệu...</span>
+            <span id="status-text">Đang kết nối...</span>
         </div>
     </div>
 
     <div class="glass-panel">
         <div class="flex-row" style="flex-wrap: wrap;">
             <input type="text" id="new-user-name" placeholder="Thêm tên người mới...">
-            <button class="btn btn-primary" onclick="addUser()">+ Thêm vào sổ</button>
+            <button class="btn btn-primary" onclick="addUser()">Thêm vào sổ</button>
         </div>
         <div class="flex-row" style="border-top: 2px dashed rgba(203,213,225,0.4); padding-top: 18px; margin-top: 5px; margin-bottom: 0;">
-            <input type="text" id="search-user-name" placeholder="🔍 Gõ để tìm kiếm nhanh..." oninput="searchUser()">
+            <input type="text" id="search-user-name" placeholder="Gõ để tìm kiếm...">
         </div>
     </div>
 
@@ -301,7 +290,7 @@
         storageBucket: "sonocuame.firebasestorage.app",
         messagingSenderId: "797314727372",
         appId: "1:797314727372:web:5afb883ef6de48489cf169",
-        databaseURL: "https://sonocuame-default-rtdb.firebaseio.com/"
+        databaseURL: "https://sonocuame-default-rtdb.asia-southeast1.firebasedatabase.app/"
     };
 
     if (!firebase.apps.length) {
@@ -316,16 +305,7 @@
         db.on('value', (snapshot) => {
             handleIncomingData(snapshot);
         }, (error) => {
-            if (error.message && error.message.indexOf("databaseURL") !== -1 || firebaseConfig.databaseURL.includes("default-rtdb")) {
-                firebase.app().delete().then(() => {
-                    firebaseConfig.databaseURL = "https://sonocuame-default-rtdb.asia-southeast1.firebasedatabase.app/";
-                    firebase.initializeApp(firebaseConfig);
-                    db = firebase.database().ref('debtors_store');
-                    db.on('value', handleIncomingData, handleConnectionError);
-                });
-            } else {
-                handleConnectionError(error);
-            }
+            handleConnectionError(error);
         });
     }
 
@@ -345,13 +325,13 @@
             debtors = [];
         }
         document.getElementById('indicator').className = 'status-indicator status-online';
-        document.getElementById('status-text').innerText = 'Dữ liệu đã sẵn sàng';
+        document.getElementById('status-text').innerText = 'Đã kết nối';
         renderList();
     }
 
     function handleConnectionError(error) {
         document.getElementById('indicator').className = 'status-indicator status-error';
-        document.getElementById('status-text').innerText = 'Không thể tải dữ liệu!';
+        document.getElementById('status-text').innerText = 'Lỗi kết nối!';
     }
 
     initializeRealtimeConnection();
@@ -427,7 +407,7 @@
         const nameInput = document.getElementById('new-user-name');
         const name = nameInput.value.trim();
         if (!name) {
-            showToast('Vui lòng gõ nhập tên người cần thêm!', true);
+            showToast('Vui lòng nhập tên!', true);
             return;
         }
         
@@ -437,31 +417,31 @@
             history: []
         }).then(() => {
             nameInput.value = '';
-            showToast(`Đã thêm thành công: ${name}`);
+            showToast(`Đã thêm: ${name}`);
         });
     }
 
     function deleteUser(fbKey, name) {
         showModal(
             'Xác nhận xóa',
-            `Bạn có chắc chắn muốn xóa tên <b>${name}</b> và toàn bộ lịch sử không?`,
+            `Xóa tên <b>${name}</b> và lịch sử?`,
             `<button class="btn" style="background:#e2e8f0; color:#475569" onclick="closeModal()">Hủy</button>
-             <button class="btn" style="background:var(--danger); color:white" onclick="confirmDelete('${fbKey}')">Đồng ý xóa</button>`
+             <button class="btn" style="background:var(--danger); color:white" onclick="confirmDelete('${fbKey}')">Xóa</button>`
         );
     }
     function confirmDelete(fbKey) {
         firebase.database().ref('debtors_store/' + fbKey).remove().then(() => {
             closeModal();
-            showToast('Đã xóa thành công', true);
+            showToast('Đã xóa', true);
         });
     }
 
     function editUser(fbKey, oldName) {
         showModal(
-            'Sửa tên người này',
-            `<input type="text" id="edit-name-input" value="${oldName}" placeholder="Nhập tên mới...">`,
+            'Đổi tên',
+            `<input type="text" id="edit-name-input" value="${oldName}" placeholder="Tên mới...">`,
             `<button class="btn" style="background:#e2e8f0; color:#475569" onclick="closeModal()">Hủy</button>
-             <button class="btn btn-primary" onclick="confirmEdit('${fbKey}')">Lưu lại</button>`
+             <button class="btn btn-primary" onclick="confirmEdit('${fbKey}')">Lưu</button>`
         );
         setTimeout(() => {
             const el = document.getElementById('edit-name-input');
@@ -475,7 +455,7 @@
                 name: newName
             }).then(() => {
                 closeModal();
-                showToast('Đã đổi tên thành công');
+                showToast('Đã đổi tên');
             });
         }
     }
@@ -483,9 +463,9 @@
     function deleteHistoryItem(fbKey, itemIndex) {
         showModal(
             'Xóa dòng này',
-            `Bạn có chắc muốn xóa dòng ghi chép số tiền này không?`,
+            `Xóa ghi chép này?`,
             `<button class="btn" style="background:#e2e8f0; color:#475569" onclick="closeModal()">Hủy</button>
-             <button class="btn" style="background:var(--danger); color:white" onclick="confirmDeleteHistoryItem('${fbKey}', ${itemIndex})">Xóa ngay</button>`
+             <button class="btn" style="background:var(--danger); color:white" onclick="confirmDeleteHistoryItem('${fbKey}', ${itemIndex})">Xóa</button>`
         );
     }
     function confirmDeleteHistoryItem(fbKey, itemIndex) {
@@ -498,14 +478,14 @@
                 history: updatedHistory
             }).then(() => {
                 closeModal();
-                showToast('Đã xóa ghi chép!', true);
+                showToast('Đã xóa!', true);
             });
         }
     }
 
     function editHistoryItem(fbKey, itemIndex, oldAmount) {
         showModal(
-            'Sửa lại số tiền',
+            'Sửa số tiền',
             `<input type="text" id="edit-money-input" value="${oldAmount.toLocaleString('vi-VN')}" oninput="formatInputMoney(this)">`,
             `<button class="btn" style="background:#e2e8f0; color:#475569" onclick="closeModal()">Hủy</button>
              <button class="btn btn-primary" onclick="confirmEditHistoryItem('${fbKey}', ${itemIndex})">Cập nhật</button>`
@@ -532,7 +512,7 @@
                 history: updatedHistory
             }).then(() => {
                 closeModal();
-                showToast('Đã sửa số tiền thành công!');
+                showToast('Đã sửa!');
             });
         }
     }
@@ -556,12 +536,12 @@
         const input = document.getElementById(`input-${id}`);
         const dateInput = document.getElementById(`date-${id}`);
         
-        let rawAmount = input.getAttribute('data-raw'] || input.value.replace(/\./g, '');
+        let rawAmount = input.getAttribute('data-raw') || input.value.replace(/\./g, '');
         let amount = parseInt(rawAmount);
         let dateValue = dateInput.value;
 
         if (!amount || amount <= 0 || !dateValue) {
-            showToast('⚠️ Vui lòng điền đủ ngày và số tiền!', true);
+            showToast('Vui lòng điền đủ ngày và số tiền!', true);
             return;
         }
 
@@ -580,7 +560,7 @@
         }).then(() => {
             input.value = '';
             input.setAttribute('data-raw', '');
-            showToast(`✅ Đã lưu: Thu ${formatMoney(amount)} từ ${user.name}`);
+            showToast(`Đã lưu: Thu ${formatMoney(amount)} từ ${user.name}`);
         });
     }
 
@@ -595,7 +575,7 @@
 
         if(filteredDebtors.length === 0) {
             listDiv.innerHTML = `<div style="text-align:center; padding: 30px; background: var(--glass-bg); border-radius: 20px; color: var(--text-sub); font-weight: 700; font-size: 16px;">
-                ${searchQuery === "" ? "Chưa có dữ liệu nào trong sổ." : "Không tìm thấy tên tương ứng."}
+                ${searchQuery === "" ? "Không có dữ liệu." : "Không tìm thấy tên."}
             </div>`;
             return;
         }
@@ -620,7 +600,7 @@
             });
 
             if(user.history.length === 0) {
-                historyHTML = '<div style="text-align:center; padding:12px; color:#94a3b8; font-weight:600; font-size: 14px; background: rgba(255,255,255,0.4); border-radius: 12px;">Chưa có lịch sử thu tiền</div>';
+                historyHTML = '<div style="text-align:center; padding:12px; color:#94a3b8; font-weight:600; font-size: 14px; background: rgba(255,255,255,0.4); border-radius: 12px;">Chưa có lịch sử</div>';
             }
 
             const card = document.createElement('div');
@@ -630,14 +610,14 @@
                     <div class="person-name-box">
                         <span class="person-name">${user.name}</span>
                         <div class="person-ops">
-                            <button class="btn-text-edit" onclick="editUser('${user.fbKey}', '${user.name}')">✏️ Đổi tên</button>
-                            <button class="btn-text-danger" onclick="deleteUser('${user.fbKey}', '${user.name}')">🗑️ Xóa</button>
+                            <button class="btn-text-edit" onclick="editUser('${user.fbKey}', '${user.name}')">Đổi tên</button>
+                            <button class="btn-text-danger" onclick="deleteUser('${user.fbKey}', '${user.name}')">Xóa</button>
                         </div>
                     </div>
-                    <div class="summary-money">Tổng thu: ${formatMoney(total)}</div>
+                    <div class="summary-money">Tổng: ${formatMoney(total)}</div>
                 </div>
 
-                <div class="section-title">🕒 Nhật ký đóng tiền:</div>
+                <div class="section-title">Nhật ký:</div>
                 <div class="logs-container">
                     ${historyHTML}
                 </div>
@@ -651,7 +631,7 @@
                     <div class="field-group">
                         <label>Số tiền (VNĐ):</label>
                         <div class="suggest-wrapper">
-                            <input type="text" id="input-${user.id}" placeholder="Gõ số tiền..." 
+                            <input type="text" id="input-${user.id}" placeholder="Nhập số tiền..." 
                                    oninput="formatInputMoney(this)"
                                    onfocus="toggleSuggestions(${user.id}, true)" 
                                    onblur="toggleSuggestions(${user.id}, false)">
@@ -665,7 +645,7 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-action" onclick="collectMoney('${user.fbKey}', ${user.id})">✅ Xác nhận thu tiền</button>
+                    <button class="btn btn-action" onclick="collectMoney('${user.fbKey}', ${user.id})">Xác nhận thu tiền</button>
                 </div>
             `;
             listDiv.appendChild(card);
