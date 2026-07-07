@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sổ Quản Lý Thu Tiền Nợ</title>
+    <title>Sổ Quản Lý Thu Tiền Nợ Cao Cấp</title>
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
@@ -27,6 +27,57 @@
             padding: 15px;
             font-size: 16px;
             min-height: 100vh;
+        }
+
+        /* Giao diện màn hình đăng nhập khóa bảo mật */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .login-box h2 {
+            margin: 0 0 10px 0;
+            color: #0f172a;
+            font-size: 22px;
+            font-weight: 800;
+        }
+        .login-box p {
+            color: #64748b;
+            font-size: 14px;
+            margin: 0 0 20px 0;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+        .login-box input:focus {
+            border-color: #3b82f6;
+        }
+
+        /* Khung nội dung chính (Ẩn đi khi chưa đăng nhập) */
+        .app-content {
+            display: none;
         }
 
         .container {
@@ -58,7 +109,6 @@
             font-size: 14px;
         }
 
-        /* Khung Thêm & Tìm kiếm */
         .tool-box {
             background: var(--card-color);
             padding: 20px;
@@ -96,7 +146,6 @@
             padding-top: 15px;
         }
 
-        /* Nút bấm */
         .btn {
             padding: 14px 24px;
             border: none;
@@ -118,7 +167,6 @@
         .btn-edit { background-color: #f0f9ff; color: #0284c7; border: 1px solid #e0f2fe; }
         .btn-edit:hover { background-color: #e0f2fe; }
 
-        /* Thẻ thông tin người nợ */
         .user-card {
             background: var(--card-color);
             border-radius: 20px;
@@ -236,7 +284,6 @@
         .btn-mini-edit { background: #e0f2fe; color: #0369a1; }
         .btn-mini-delete { background: #fee2e2; color: #b91c1c; }
 
-        /* Khu nhập liệu đóng tiền */
         .action-zone {
             display: grid;
             grid-template-columns: 1fr;
@@ -275,7 +322,6 @@
 
         .money-input-wrapper { position: relative; }
 
-        /* Menu gợi ý */
         .suggestions {
             display: none;
             position: absolute;
@@ -299,12 +345,11 @@
         .suggestion-item:last-child { border-bottom: none; }
         .suggestion-item:hover { background-color: #eff6ff; color: #3b82f6; }
 
-        /* Thông báo Toast */
         #toast-container {
             position: fixed;
             top: 20px; right: 20px; left: 20px;
             margin: auto; max-width: 380px;
-            z-index: 9999;
+            z-index: 999999;
         }
         @media(min-width: 600px) { #toast-container { left: auto; } }
         .toast {
@@ -320,7 +365,6 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        /* Hộp thoại Modal mẫu */
         .modal-overlay {
             display: none; position: fixed;
             top:0; left:0; right:0; bottom:0;
@@ -346,6 +390,15 @@
 
 <div id="toast-container"></div>
 
+<div id="login-screen" class="login-overlay">
+    <div class="login-box">
+        <h2>HỆ THỐNG KHÓA BẢO MẬT</h2>
+        <p>Vui lòng nhập mật khẩu để xem hoặc sửa dữ liệu sổ nợ</p>
+        <input type="password" id="password-input" placeholder="Nhập mật khẩu nhập sổ nợ..." onkeydown="checkPasswordKey(event)">
+        <button class="btn btn-primary" style="width:100%;" onclick="verifyPassword()">Đăng Nhập Hệ Thống</button>
+    </div>
+</div>
+
 <div id="custom-modal" class="modal-overlay">
     <div class="modal-box">
         <h3 id="modal-title">Thông báo</h3>
@@ -354,30 +407,61 @@
     </div>
 </div>
 
-<div class="container">
-    <div class="app-header">
-        <h1>Sổ Quản Lý Thu Tiền Nợ</h1>
-        <p></p>
-    </div>
-
-    <div class="tool-box">
-        <div class="input-row">
-            <input type="text" id="new-user-name" placeholder="Nhập tên người thiếu tiền mới...">
-            <button class="btn btn-primary" onclick="addUser()">Thêm Người</button>
+<div id="main-app" class="app-content">
+    <div class="container">
+        <div class="app-header">
+            <h1>Sổ Quản Lý Thu Tiền Nợ</h1>
+            <p>Giao diện nâng cấp thông minh - Bảo mật an toàn cao</p>
         </div>
-        
-        <div class="input-row search-box">
-            <input type="text" id="search-user-name" placeholder="🔍 Gõ vào đây để TÌM TÊN người nợ..." oninput="searchUser()">
-        </div>
-    </div>
 
-    <div id="user-list" class="user-list"></div>
+        <div class="tool-box">
+            <div class="input-row">
+                <input type="text" id="new-user-name" placeholder="Nhập tên người thiếu tiền mới...">
+                <button class="btn btn-primary" onclick="addUser()">Thêm Người</button>
+            </div>
+            
+            <div class="input-row search-box">
+                <input type="text" id="search-user-name" placeholder="🔍 Gõ vào đây để TÌM TÊN người nợ..." oninput="searchUser()">
+            </div>
+        </div>
+
+        <div id="user-list" class="user-list"></div>
+    </div>
 </div>
 
 <script>
-    // Dữ liệu được cô lập hoàn toàn ở vùng nhớ ẩn 'debtors_final_store'
-    let debtors = JSON.parse(localStorage.getItem('debtors_final_store')) || [];
+    // Dữ liệu trống ban đầu, chỉ được nạp từ LocalStorage khi ĐỒNG Ý mật khẩu chính xác
+    let debtors = [];
     let searchQuery = "";
+
+    // 🔒 KIỂM TRA MẬT KHẨU BẢO MẬT
+    function checkPasswordKey(event) {
+        if (event.key === "Enter") {
+            verifyPassword();
+        }
+    }
+
+    function verifyPassword() {
+        const passwordEntered = document.getElementById("password-input").value;
+        if (passwordEntered === "bminh1808") {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("main-app").style.display = "block";
+            
+            // Chỉ nạp dữ liệu từ bộ nhớ sau khi vượt qua mật khẩu thành công
+            debtors = JSON.parse(localStorage.getItem('debtors_final_store')) || [];
+            renderList();
+            showToast("Đăng nhập thành công! Đã mở khóa sổ nợ.");
+        } else {
+            showToast("Mật khẩu sai! Vui lòng không xâm nhập bất hợp pháp.", "error");
+        }
+    }
+
+    // Hàm thông minh giải quyết lỗi vị trí gõ phím (Nhảy con trỏ chuột về CUỐI DÒNG)
+    function focusAndMoveCursorToEnd(inputElement) {
+        inputElement.focus();
+        const length = inputElement.value.length;
+        inputElement.setSelectionRange(length, length);
+    }
 
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -479,7 +563,11 @@
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
              <button class="btn btn-primary" onclick="confirmEdit(${id})">Lưu lại</button>`
         );
-        setTimeout(() => document.getElementById('edit-name-input').focus(), 100);
+        // Khắc phục lỗi nhảy con trỏ lên đầu dòng chữ khi đổi tên người nợ
+        setTimeout(() => {
+            const el = document.getElementById('edit-name-input');
+            focusAndMoveCursorToEnd(el);
+        }, 100);
     }
     function confirmEdit(id) {
         const newName = document.getElementById('edit-name-input').value.trim();
@@ -494,11 +582,10 @@
         }
     }
 
-    // CHỨC NĂNG MỚI: XÓA LƯỢT THU TIỀN BỊ BẤM NHẦM
     function deleteHistoryItem(userId, itemTimestamp) {
         showModal(
             'Xác nhận xóa lượt thu này',
-            `<p>Bạn có chắc chắn muốn xóa lịch sử thu tiền của lượt này không?</p>`,
+            `<p>Bạn có chắc chắn muốn xóa lịch sử thu tiền của lượt bấm nhầm này không?</p>`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
              <button class="btn btn-danger" onclick="confirmDeleteHistoryItem(${userId}, ${itemTimestamp})">Xóa ngay</button>`
         );
@@ -509,22 +596,22 @@
             user.history = user.history.filter(item => item.timestamp !== itemTimestamp);
             saveData();
             closeModal();
-            showToast('Đã xóa lượt thu tiền!', 'error');
+            showToast('Đã xóa lượt thu tiền chọn nhầm!', 'error');
         }
     }
 
-    // CHỨC NĂNG MỚI: SỬA LẠI SỐ TIỀN BỊ NHẬP NHẦM
     function editHistoryItem(userId, itemTimestamp, oldAmount) {
         showModal(
-            'Sửa lại số tiền',
-            `<p style="font-size:14px; color:#64748b; margin-bottom:5px;"></p>
+            'Sửa lại số tiền nhầm',
+            `<p style="font-size:14px; color:#64748b; margin-bottom:5px;">Nhập lại số tiền đúng (đ):</p>
              <input type="text" id="edit-money-input" value="${oldAmount.toLocaleString('vi-VN')}" oninput="formatInputMoney(this)">`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
              <button class="btn btn-primary" onclick="confirmEditHistoryItem(${userId}, ${itemTimestamp})">Cập nhật</button>`
         );
+        // Khắc phục lỗi nhảy con trỏ lên đầu dòng chữ khi sửa số tiền đóng
         setTimeout(() => {
             const input = document.getElementById('edit-money-input');
-            input.focus();
+            focusAndMoveCursorToEnd(input);
             input.setAttribute('data-raw', oldAmount);
         }, 100);
     }
@@ -569,7 +656,7 @@
         const input = document.getElementById(`input-${id}`);
         const dateInput = document.getElementById(`date-${id}`);
         
-        let rawAmount = input.getAttribute('data-raw') || input.value.replace(/\./g, '');
+        let rawAmount = input.getAttribute('data-raw()') || input.value.replace(/\./g, '');
         let amount = parseInt(rawAmount);
         let dateValue = dateInput.value;
 
@@ -586,7 +673,7 @@
         const user = debtors.find(u => u.id === id);
         
         user.history.push({
-            timestamp: Date.now(), // Định danh riêng biệt để dễ Sửa/Xóa sau này
+            timestamp: Date.now(),
             date: formattedDate,
             amount: amount
         });
@@ -618,7 +705,6 @@
 
             let historyHTML = '';
             user.history.forEach(item => {
-                // Đảm bảo các dữ liệu cũ chưa có timestamp thì tự bổ sung để không bị lỗi
                 if(!item.timestamp) item.timestamp = Date.now() + Math.random();
                 
                 historyHTML += `
@@ -685,8 +771,6 @@
             listDiv.appendChild(card);
         });
     }
-
-    renderList();
 </script>
 </body>
 </html>
