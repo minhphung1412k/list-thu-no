@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sổ Quản Lý Thu Tiền Nợ Cao Cấp</title>
+    <title>Sổ Quản Lý Thu Tiền Nợ Tự Động Đồng Bộ</title>
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
@@ -46,7 +46,7 @@
 
         .app-header h1 {
             margin: 0 0 10px 0;
-            font-size: 26px;
+            font-size: 24px;
             text-transform: uppercase;
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -57,6 +57,27 @@
             opacity: 0.9;
             font-size: 14px;
         }
+
+        .status-bar {
+            background: #fff;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .status-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #cbd5e1;
+        }
+        .status-online { background: #10b981; box-shadow: 0 0 8px #10b981; }
+        .status-error { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
 
         .tool-box {
             background: var(--card-color);
@@ -334,6 +355,9 @@
         }
         .modal-buttons { display: flex; gap: 10px; justify-content: center; }
     </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
@@ -350,7 +374,12 @@
 <div class="container">
     <div class="app-header">
         <h1>Sổ Quản Lý Thu Tiền Nợ</h1>
-        <p>Giao diện nâng cấp thông minh - Tiện lợi cho Mẹ</p>
+        <p>Hệ thống Đám Mây - Đồng Bộ Thời Gian Thực Giữa Các Máy</p>
+    </div>
+
+    <div class="status-bar">
+        <div id="net-dot" class="status-dot"></div>
+        <span id="net-text">Đang kết nối đám mây...</span>
     </div>
 
     <div class="tool-box">
@@ -368,10 +397,76 @@
 </div>
 
 <script>
-    let debtors = JSON.parse(localStorage.getItem('debtors_final_store')) || [];
+    // Đã tích hợp chính xác mã cấu hình Firebase của bạn
+    const firebaseConfig = {
+        apiKey: "AIzaSyDL-Ejne2yDo446xVHW1LRLWekHJov_luw",
+        authDomain: "sonocuame.firebaseapp.com",
+        projectId: "sonocuame",
+        storageBucket: "sonocuame.firebasestorage.app",
+        messagingSenderId: "797314727372",
+        appId: "1:797314727372:web:5afb883ef6de48489cf169",
+        // Hệ thống tự động thiết lập URL phù hợp với mọi vị trí máy chủ (Mỹ/Singapore)
+        databaseURL: "https://sonocuame-default-rtdb.firebaseio.com/"
+    };
+
+    // Khởi tạo Firebase đám mây
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
+    let db = firebase.database().ref('debtors_store');
+    let debtors = [];
     let searchQuery = "";
 
-    // Hàm thông minh giải quyết lỗi vị trí gõ phím (Nhảy con trỏ về CUỐI DÒNG)
+    // Hàm tự động xử lý và cấu hình lại URL nếu bạn chọn máy chủ Khu vực Singapore (asia-southeast1)
+    function initializeRealtimeConnection() {
+        db.on('value', (snapshot) => {
+            handleIncomingData(snapshot);
+        }, (error) => {
+            // Nếu lỗi do sai URL máy chủ mặc định, tự chuyển đổi sang máy chủ Singapore
+            if (error.message && error.message.indexOf("databaseURL") !== -1 || firebaseConfig.databaseURL.includes("default-rtdb")) {
+                console.log("Đang tự động chuyển đổi sang máy chủ khu vực Singapore...");
+                firebase.app().delete().then(() => {
+                    firebaseConfig.databaseURL = "https://sonocuame-default-rtdb.asia-southeast1.firebasedatabase.app/";
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.database().ref('debtors_store');
+                    db.on('value', handleIncomingData, handleConnectionError);
+                });
+            } else {
+                handleConnectionError(error);
+            }
+        });
+    }
+
+    function handleIncomingData(snapshot) {
+        const data = snapshot.val();
+        if (data) {
+            debtors = Object.keys(data).map(key => {
+                let user = data[key];
+                user.fbKey = key;
+                if (!user.history) user.history = [];
+                if (user.history && !Array.isArray(user.history)) {
+                    user.history = Object.keys(user.history).map(hKey => user.history[hKey]);
+                }
+                return user;
+            });
+        } else {
+            debtors = [];
+        }
+        document.getElementById('net-dot').className = 'status-dot status-online';
+        document.getElementById('net-text').innerText = 'Đã đồng bộ kết nối Đám Mây trực tuyến';
+        renderList();
+    }
+
+    function handleConnectionError(error) {
+        document.getElementById('net-dot').className = 'status-dot status-error';
+        document.getElementById('net-text').innerText = 'LƯU Ý: Vui lòng hoàn thành "Bước 2" bật Realtime Database trên trang web Firebase!';
+        console.error(error);
+    }
+
+    // Bắt đầu kích hoạt kết nối dữ liệu đám mây
+    initializeRealtimeConnection();
+
     function focusAndMoveCursorToEnd(inputElement) {
         inputElement.focus();
         const length = inputElement.value.length;
@@ -399,11 +494,6 @@
     
     function closeModal() {
         document.getElementById('custom-modal').style.display = 'none';
-    }
-
-    function saveData() {
-        localStorage.setItem('debtors_final_store', JSON.stringify(debtors));
-        renderList();
     }
 
     function searchUser() {
@@ -446,81 +536,90 @@
             showToast('Vui lòng nhập tên người nợ!', 'error');
             return;
         }
-        debtors.push({
+        
+        db.push({
             id: Date.now(),
             name: name,
             history: []
+        }).then(() => {
+            nameInput.value = '';
+            showToast(`Đã thêm thành công: ${name}`);
+        }).catch(() => {
+            showToast('Lỗi ghi dữ liệu! Bạn đã bật "Chế độ thử nghiệm" trên Firebase chưa?', 'error');
         });
-        nameInput.value = '';
-        showToast(`Đã thêm thành công: ${name}`);
-        saveData();
     }
 
-    function deleteUser(id, name) {
+    function deleteUser(fbKey, name) {
         showModal(
             'Xác nhận xóa hẳn',
-            `<p>Bạn có chắc chắn muốn xóa tên <b>${name}</b> không? Toàn bộ lịch sử thu tiền của người này sẽ mất sạch!</p>`,
+            `<p>Bạn có chắc chắn muốn xóa tên <b>${name}</b> không? Toàn bộ lịch sử trên hệ thống đám mây sẽ mất sạch!</p>`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
-             <button class="btn btn-danger" onclick="confirmDelete(${id})">Đồng ý xóa</button>`
+             <button class="btn btn-danger" onclick="confirmDelete('${fbKey}')">Đồng ý xóa</button>`
         );
     }
-    function confirmDelete(id) {
-        debtors = debtors.filter(user => user.id !== id);
-        closeModal();
-        showToast('Đã xóa người nợ khỏi danh sách', 'error');
-        saveData();
+    function confirmDelete(fbKey) {
+        firebase.database().ref('debtors_store/' + fbKey).remove().then(() => {
+            closeModal();
+            showToast('Đã xóa người nợ khỏi hệ thống', 'error');
+        });
     }
 
-    function editUser(id, oldName) {
+    function editUser(fbKey, oldName) {
         showModal(
             'Đổi tên người nợ',
             `<input type="text" id="edit-name-input" value="${oldName}" placeholder="Nhập tên mới...">`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
-             <button class="btn btn-primary" onclick="confirmEdit(${id})">Lưu lại</button>`
+             <button class="btn btn-primary" onclick="confirmEdit('${fbKey}')">Lưu lại</button>`
         );
         setTimeout(() => {
             const el = document.getElementById('edit-name-input');
             focusAndMoveCursorToEnd(el);
         }, 100);
     }
-    function confirmEdit(id) {
+    function confirmEdit(fbKey) {
         const newName = document.getElementById('edit-name-input').value.trim();
         if(newName) {
-            const user = debtors.find(u => u.id === id);
-            user.name = newName;
-            closeModal();
-            showToast('Đã cập nhật tên mới thành công');
-            saveData();
+            firebase.database().ref('debtors_store/' + fbKey).update({
+                name: newName
+            }).then(() => {
+                closeModal();
+                showToast('Đã cập nhật tên mới thành công');
+            });
         } else {
             showToast('Tên không được để trống!', 'error');
         }
     }
 
-    function deleteHistoryItem(userId, itemTimestamp) {
+    function deleteHistoryItem(fbKey, itemIndex) {
         showModal(
             'Xác nhận xóa lượt thu này',
             `<p>Bạn có chắc chắn muốn xóa lịch sử thu tiền của lượt bấm nhầm này không?</p>`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
-             <button class="btn btn-danger" onclick="confirmDeleteHistoryItem(${userId}, ${itemTimestamp})">Xóa ngay</button>`
+             <button class="btn btn-danger" onclick="confirmDeleteHistoryItem('${fbKey}', ${itemIndex})">Xóa ngay</button>`
         );
     }
-    function confirmDeleteHistoryItem(userId, itemTimestamp) {
-        const user = debtors.find(u => u.id === userId);
+    function confirmDeleteHistoryItem(fbKey, itemIndex) {
+        const user = debtors.find(u => u.fbKey === fbKey);
         if(user) {
-            user.history = user.history.filter(item => item.timestamp !== itemTimestamp);
-            saveData();
-            closeModal();
-            showToast('Đã xóa lượt thu tiền chọn nhầm!', 'error');
+            let updatedHistory = [...user.history];
+            updatedHistory.splice(itemIndex, 1);
+            
+            firebase.database().ref('debtors_store/' + fbKey).update({
+                history: updatedHistory
+            }).then(() => {
+                closeModal();
+                showToast('Đã xóa lượt thu tiền chọn nhầm!', 'error');
+            });
         }
     }
 
-    function editHistoryItem(userId, itemTimestamp, oldAmount) {
+    function editHistoryItem(fbKey, itemIndex, oldAmount) {
         showModal(
             'Sửa lại số tiền nhầm',
             `<p style="font-size:14px; color:#64748b; margin-bottom:5px;">Nhập lại số tiền đúng (đ):</p>
              <input type="text" id="edit-money-input" value="${oldAmount.toLocaleString('vi-VN')}" oninput="formatInputMoney(this)">`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
-             <button class="btn btn-primary" onclick="confirmEditHistoryItem(${userId}, ${itemTimestamp})">Cập nhật</button>`
+             <button class="btn btn-primary" onclick="confirmEditHistoryItem('${fbKey}', ${itemIndex})">Cập nhật</button>`
         );
         setTimeout(() => {
             const input = document.getElementById('edit-money-input');
@@ -528,7 +627,7 @@
             input.setAttribute('data-raw', oldAmount);
         }, 100);
     }
-    function confirmEditHistoryItem(userId, itemTimestamp) {
+    function confirmEditHistoryItem(fbKey, itemIndex) {
         const input = document.getElementById('edit-money-input');
         let rawAmount = input.getAttribute('data-raw') || input.value.replace(/\./g, '');
         let newAmount = parseInt(rawAmount);
@@ -538,15 +637,17 @@
             return;
         }
 
-        const user = debtors.find(u => u.id === userId);
+        const user = debtors.find(u => u.fbKey === fbKey);
         if(user) {
-            const item = user.history.find(h => h.timestamp === itemTimestamp);
-            if(item) {
-                item.amount = newAmount;
-                saveData();
+            let updatedHistory = [...user.history];
+            updatedHistory[itemIndex].amount = newAmount;
+            
+            firebase.database().ref('debtors_store/' + fbKey).update({
+                history: updatedHistory
+            }).then(() => {
                 closeModal();
                 showToast('Đã sửa số tiền thành công!');
-            }
+            });
         }
     }
 
@@ -559,17 +660,13 @@
         }
     }
 
-    const style = document.createElement('style');
-    style.innerHTML = '.money-input-wrapper { position: relative; }';
-    document.head.appendChild(style);
-
     function selectSuggestion(id, value) {
         const input = document.getElementById(`input-${id}`);
         input.value = value.toLocaleString('vi-VN');
         input.setAttribute('data-raw', value);
     }
 
-    function collectMoney(id) {
+    function collectMoney(fbKey, id) {
         const input = document.getElementById(`input-${id}`);
         const dateInput = document.getElementById(`date-${id}`);
         
@@ -587,18 +684,22 @@
         }
 
         const formattedDate = formatVietnameseDate(dateValue);
-        const user = debtors.find(u => u.id === id);
+        const user = debtors.find(u => u.fbKey === fbKey);
         
-        user.history.push({
+        let updatedHistory = user.history ? [...user.history] : [];
+        updatedHistory.push({
             timestamp: Date.now(),
             date: formattedDate,
             amount: amount
         });
 
-        input.value = '';
-        input.setAttribute('data-raw', '');
-        showToast(`Đã ghi: Thu ${formatMoney(amount)} từ ${user.name}`);
-        saveData();
+        firebase.database().ref('debtors_store/' + fbKey).update({
+            history: updatedHistory
+        }).then(() => {
+            input.value = '';
+            input.setAttribute('data-raw', '');
+            showToast(`Đã đám mây ghi nhận: Thu ${formatMoney(amount)} từ ${user.name}`);
+        });
     }
 
     function renderList() {
@@ -612,7 +713,7 @@
 
         if(filteredDebtors.length === 0) {
             listDiv.innerHTML = `<p style="text-align:center; color:#64748b; font-size:18px; margin-top:30px;">
-                ${searchQuery === "" ? "Sổ hiện tại đang trống." : "Không tìm thấy người nợ nào có tên này."}
+                ${searchQuery === "" ? "Sổ đám mây đang trống." : "Không tìm thấy người nợ nào có tên này."}
             </p>`;
             return;
         }
@@ -621,9 +722,7 @@
             const total = user.history.reduce((sum, item) => sum + item.amount, 0);
 
             let historyHTML = '';
-            user.history.forEach(item => {
-                if(!item.timestamp) item.timestamp = Date.now() + Math.random();
-                
+            user.history.forEach((item, index) => {
                 historyHTML += `
                     <div class="history-item">
                         <div class="history-details">
@@ -631,8 +730,8 @@
                             <span class="amount">+${formatMoney(item.amount)}</span>
                         </div>
                         <div class="history-actions">
-                            <button class="btn-mini btn-mini-edit" onclick="editHistoryItem(${user.id}, ${item.timestamp}, ${item.amount})">Sửa</button>
-                            <button class="btn-mini btn-mini-delete" onclick="deleteHistoryItem(${user.id}, ${item.timestamp})">Xóa</button>
+                            <button class="btn-mini btn-mini-edit" onclick="editHistoryItem('${user.fbKey}', ${index}, ${item.amount})">Sửa</button>
+                            <button class="btn-mini btn-mini-delete" onclick="deleteHistoryItem('${user.fbKey}', ${index})">Xóa</button>
                         </div>
                     </div>
                 `;
@@ -648,8 +747,8 @@
                 <div class="user-header">
                     <div class="user-info">
                         <span class="user-name">${user.name}</span>
-                        <button class="btn btn-edit" style="padding:6px 12px; font-size:14px;" onclick="editUser(${user.id}, '${user.name}')">Sửa tên</button>
-                        <button class="btn btn-danger" style="padding:6px 12px; font-size:14px;" onclick="deleteUser(${user.id}, '${user.name}')">Xóa người nợ</button>
+                        <button class="btn btn-edit" style="padding:6px 12px; font-size:14px;" onclick="editUser('${user.fbKey}', '${user.name}')">Sửa tên</button>
+                        <button class="btn btn-danger" style="padding:6px 12px; font-size:14px;" onclick="deleteUser('${user.fbKey}', '${user.name}')">Xóa người nợ</button>
                     </div>
                     <div class="total-money">Tổng thu: ${formatMoney(total)}</div>
                 </div>
@@ -682,14 +781,12 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-success" onclick="collectMoney(${user.id})">Xác Nhận Thu Tiền</button>
+                    <button class="btn btn-success" onclick="collectMoney('${user.fbKey}', ${user.id})">Xác Nhận Thu Tiền</button>
                 </div>
             `;
             listDiv.appendChild(card);
         });
     }
-
-    renderList();
 </script>
 </body>
 </html>
