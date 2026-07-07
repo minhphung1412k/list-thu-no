@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Thu Nợ</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --success-color: #16a34a;
+            --danger-color: #dc2626;
+            --background-color: #f8fafc;
+            --card-color: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        /* Thêm người mới */
+        .add-user-box {
+            background: var(--card-color);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .add-user-box input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-success { background-color: var(--success-color); color: white; }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+
+        /* Danh sách người thiếu */
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .user-card {
+            background: var(--card-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .total-money {
+            font-size: 18px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        /* Lịch sử đóng tiền */
+        .history-zone {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .history-item {
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .history-item .date { color: #64748b; font-weight: 500; }
+        .history-item .amount { color: var(--success-color); font-weight: bold; }
+
+        /* Khu vực nhập tiền */
+        .action-zone {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .date-picker {
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
+        .money-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .money-input {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            width: 140px;
+        }
+
+        /* Menu gợi ý số tiền */
+        .suggestions {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Quản Lý Thu Tiền Nợ</h1>
+
+    <!-- Form thêm người nợ mới -->
+    <div class="add-user-box">
+        <input type="text" id="new-user-name" placeholder="Nhập tên người thiếu tiền...">
+        <button class="btn btn-primary" onclick="addUser()">Thêm Người Mới</button>
+    </div>
+
+    <!-- Danh sách hiển thị -->
+    <div id="user-list" class="user-list"></div>
+</div>
+
+<script>
+    // Dữ liệu mẫu ban đầu nếu máy chưa có data
+    let debtors = JSON.parse(localStorage.getItem('debtors')) || [];
+
+    // Hàm lưu dữ liệu vào trình duyệt
+    function saveData() {
+        localStorage.setItem('debtors', JSON.stringify(debtors));
+        renderList();
+    }
+
+    // Định dạng ngày hiển thị (VD: Ngày 07/07)
+    function getTodayDateString() {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        return `${dd}/${mm}`;
+    }
+
+    // Thêm người mới
+    function addUser() {
+        const nameInput = document.getElementById('new-user-name');
+        const name = nameInput.value.trim();
+        if (!name) return alert('Vui lòng nhập tên!');
+        
+        debtors.push({
+            id: Date.now(),
+            name: name,
+            history: [] // Chứa danh sách { date: '07/07', amount: 100 }
+        });
+        
+        nameInput.value = '';
+        saveData();
+    }
+
+    // Xóa người nợ
+    function deleteUser(id) {
+        if(confirm('Bạn có chắc chắn muốn xóa người này không? Dữ liệu thu tiền cũng sẽ mất.')) {
+            debtors = debtors.filter(user => user.id !== id);
+            saveData();
+        }
+    }
+
+    // Sửa tên người nợ
+    function editUser(id) {
+        const user = debtors.find(u => u.id === id);
+        const newName = prompt("Nhập tên mới cho " + user.name + ":", user.name);
+        if (newName && newName.trim() !== "") {
+            user.name = newName.trim();
+            saveData();
+        }
+    }
+
+    // Hiển thị/Ẩn menu gợi ý tiền khi click vào input
+    function toggleSuggestions(id, show) {
+        const sugDiv = document.getElementById(`sug-${id}`);
+        if(show) {
+            sugDiv.style.display = 'block';
+        } else {
+            // Delay một xíu để kịp nhận sự kiện click chọn số tiền trước khi ẩn
+            setTimeout(() => { sugDiv.style.display = 'none'; }, 200);
+        }
+    }
+
+    // Chọn số tiền từ gợi ý
+    function selectSuggestion(id, value) {
+        const input = document.getElementById(`input-${id}`);
+        input.value = value;
+    }
+
+    // Xác nhận thu tiền của một người
+    function collectMoney(id) {
+        const input = document.getElementById(`input-${id}`);
+        const dateInput = document.getElementById(`date-${id}`);
+        
+        let amount = parseInt(input.value);
+        let dateValue = dateInput.value; // Định dạng YYYY-MM-DD từ ô chọn ngày
+
+        if (!amount || amount <= 0) return alert('Vui lòng nhập hoặc chọn số tiền hợp lệ!');
+        
+        // Định dạng lại ngày từ input dạng lịch thành dd/mm để hiển thị gọn
+        let formattedDate = getTodayDateString();
+        if(dateValue) {
+            const parts = dateValue.split('-');
+            formattedDate = `${parts[2]}/${parts[1]}`;
+        }
+
+        const user = debtors.find(u => u.id === id);
+        user.history.push({
+            date: formattedDate,
+            amount: amount
+        });
+
+        input.value = ''; // Reset ô nhập tiền
+        saveData();
+    }
+
+    // Hàm render (vẽ) giao diện ra màn hình dựa trên dữ liệu
+    function renderList() {
+        const listDiv = document.getElementById('user-list');
+        listDiv.innerHTML = '';
+
+        if(debtors.length === 0) {
+            listDiv.innerHTML = '<p style="text-align:center; color:#64748b;">Chưa có ai trong danh sách thiếu tiền.</p>';
+            return;
+        }
+
+        debtors.forEach(user => {
+            // Tính tổng tiền đã thu của người này
+            const total = user.history.reduce((sum, item) => sum + item.amount, 0);
+
+            // Tạo danh sách lịch sử đóng tiền dạng html
+            let historyHTML = '';
+            user.history.forEach(item => {
+                historyHTML += `
+                    <div class="history-item">
+                        <span class="date">${item.date}:</span>
+                        <span class="amount">+${item.amount}k</span>
+                    </div>
+                `;
+            });
+
+            if(user.history.length === 0) {
+                historyHTML = '<span style="font-size:14px; color:#94a3b8;">Chưa có lịch sử thu tiền</span>';
+            }
+
+            // Tạo thẻ thông tin người nợ
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            card.innerHTML = `
+                <div class="user-header">
+                    <div class="user-info">
+                        <span class="user-name">${user.name}</span>
+                        <button class="btn btn-primary" style="padding:4px 8px; font-size:12px;" onclick="editUser(${user.id})">Sửa tên</button>
+                        <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteUser(${user.id})">Xóa</button>
+                    </div>
+                    <div class="total-money">Đã thu: ${total}k</div>
+                </div>
+
+                <!-- Lịch sử đóng tiền -->
+                <div class="history-zone">
+                    ${historyHTML}
+                </div>
+
+                <!-- Khu vực nhập thu tiền -->
+                <div class="action-zone">
+                    <label style="font-size:14px; font-weight:500;">Ngày thu:</label>
+                    <input type="date" id="date-${user.id}" class="date-picker">
+                    
+                    <label style="font-size:14px; font-weight:500;">Số tiền (k):</label>
+                    <div class="money-input-wrapper">
+                        <input type="number" id="input-${user.id}" class="money-input" placeholder="Tự ghi hoặc chọn..." 
+                               onfocus="toggleSuggestions(${user.id}, true)" 
+                               onblur="toggleSuggestions(${user.id}, false)">
+                        
+                        <!-- Menu gợi ý nhảy ra khi bấm vào ô tiền -->
+                        <div id="sug-${user.id}" class="suggestions">
+                            <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 50)">50k</div>
+                            <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 100)">100k</div>
+                            <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 200)">200k</div>
+                            <div class="suggestion-item" onmousedown="selectSuggestion(${user.id}, 500)">500k</div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="collectMoney(${user.id})">Xác nhận thu</button>
+                </div>
+            `;
+            listDiv.appendChild(card);
+        });
+    }
+
+    // Chạy render lần đầu tiên khi mở trang web lên
+    renderList();
+</script>
+
+</body>
+</html>
