@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sổ Quản Lý Thu Tiền Nợ Cao Cấp</title>
+    <title>Sổ Quản Lý Thu Tiền Nợ</title>
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
@@ -357,7 +357,7 @@
 <div class="container">
     <div class="app-header">
         <h1>Sổ Quản Lý Thu Tiền Nợ</h1>
-        <p>Giao diện nâng cấp thông minh - Tiện lợi cho Mẹ</p>
+        <p></p>
     </div>
 
     <div class="tool-box">
@@ -498,7 +498,7 @@
     function deleteHistoryItem(userId, itemTimestamp) {
         showModal(
             'Xác nhận xóa lượt thu này',
-            `<p>Bạn có chắc chắn muốn xóa lịch sử thu tiền của lượt bấm nhầm này không?</p>`,
+            `<p>Bạn có chắc chắn muốn xóa lịch sử thu tiền của lượt này không?</p>`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
              <button class="btn btn-danger" onclick="confirmDeleteHistoryItem(${userId}, ${itemTimestamp})">Xóa ngay</button>`
         );
@@ -509,15 +509,15 @@
             user.history = user.history.filter(item => item.timestamp !== itemTimestamp);
             saveData();
             closeModal();
-            showToast('Đã xóa lượt thu tiền chọn nhầm!', 'error');
+            showToast('Đã xóa lượt thu tiền!', 'error');
         }
     }
 
     // CHỨC NĂNG MỚI: SỬA LẠI SỐ TIỀN BỊ NHẬP NHẦM
     function editHistoryItem(userId, itemTimestamp, oldAmount) {
         showModal(
-            'Sửa lại số tiền nhầm',
-            `<p style="font-size:14px; color:#64748b; margin-bottom:5px;">Nhập lại số tiền đúng (đ):</p>
+            'Sửa lại số tiền',
+            `<p style="font-size:14px; color:#64748b; margin-bottom:5px;"> (đ):</p>
              <input type="text" id="edit-money-input" value="${oldAmount.toLocaleString('vi-VN')}" oninput="formatInputMoney(this)">`,
             `<button class="btn" style="background:#cbd5e1" onclick="closeModal()">Hủy</button>
              <button class="btn btn-primary" onclick="confirmEditHistoryItem(${userId}, ${itemTimestamp})">Cập nhật</button>`
