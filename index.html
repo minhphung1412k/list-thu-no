@@ -275,7 +275,7 @@
             <button class="btn btn-primary" onclick="addUser()">Thêm vào sổ</button>
         </div>
         <div class="flex-row" style="border-top: 2px dashed rgba(203,213,225,0.4); padding-top: 18px; margin-top: 5px; margin-bottom: 0;">
-            <input type="text" id="search-user-name" placeholder="Gõ để tìm kiếm...">
+            <input type="text" id="search-user-name" oninput="searchUser()" placeholder="Gõ để tìm kiếm...">
         </div>
     </div>
 
@@ -290,7 +290,7 @@
         storageBucket: "sonocuame.firebasestorage.app",
         messagingSenderId: "797314727372",
         appId: "1:797314727372:web:5afb883ef6de48489cf169",
-        databaseURL: "https://sonocuame-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        databaseURL: "https://sonocuame-default-rtdb.firebaseio.com/"
     };
 
     if (!firebase.apps.length) {
